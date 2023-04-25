@@ -1,31 +1,41 @@
 //
-//  ContentView.swift
+//  ContentView2.swift
 //  HotProspects
 //
-//  Created by Maurício Costa on 20/02/23.
+//  Created by Maurício Costa on 24/04/23.
 //
 
 import SwiftUI
 
 struct ContentView: View {
-    @State private var output = ""
+    
+    @StateObject var prospects = Prospects()
     
     var body: some View {
-        Text(output).task {
-            await fetchReadings()
+        TabView {
+            ProspectsView(filter: .none)
+                .tabItem {
+                    Label("Everyone", systemImage: "person.3")
+                }
+            ProspectsView(filter: .contacted)
+                .tabItem {
+                    Label("Contacted", systemImage: "checkmark.circle")
+                }
+            ProspectsView(filter: .uncontacted)
+                .tabItem {
+                    Label("Uncontacted", image: "questionmark.diamond")
+                }
+            MeView()
+                .tabItem {
+                    Label("Me", systemImage: "person.crop.square")
+                }
         }
-    }
-    func fetchReadings() async {
-        let fetchTask = Task { () -> String in
-            let url = URL(string: "https://hws.dev/readings.json")!
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let readings = try JSONDecoder().decode([Double].self, from: data)
-            return "Found \(readings.count) readings"
-        }
+        .environmentObject(prospects)
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
+    @StateObject var prospects = Prospects()
     static var previews: some View {
         ContentView()
     }
